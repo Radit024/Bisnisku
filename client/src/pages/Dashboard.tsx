@@ -21,7 +21,7 @@ export default function Dashboard() {
   // Fetch recent transactions
   const { data: transactions = [] } = useQuery<Transaction[]>({
     queryKey: ["/api/transactions", dbUser?.id],
-    enabled: !!dbUser?.id,
+    enabled: !!dbUser?.id && dbUser.id > 0,
   });
 
   // Fetch financial summary
@@ -32,19 +32,19 @@ export default function Dashboard() {
     transactionCount: 0,
   } } = useQuery({
     queryKey: ["/api/financial-summary", dbUser?.id, startOfMonth.toISOString(), endOfMonth.toISOString()],
-    enabled: !!dbUser?.id,
+    enabled: !!dbUser?.id && dbUser.id > 0,
   });
 
   // Fetch customers
   const { data: customers = [] } = useQuery<Customer[]>({
     queryKey: ["/api/customers", dbUser?.id],
-    enabled: !!dbUser?.id,
+    enabled: !!dbUser?.id && dbUser.id > 0,
   });
 
   // Fetch business settings for BEP calculation
   const { data: businessSettings } = useQuery({
     queryKey: ["/api/business-settings", dbUser?.id],
-    enabled: !!dbUser?.id,
+    enabled: !!dbUser?.id && dbUser.id > 0,
   });
 
   // Calculate metrics

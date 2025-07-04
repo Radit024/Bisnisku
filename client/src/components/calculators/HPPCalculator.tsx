@@ -35,6 +35,13 @@ export function HPPCalculator() {
     },
   });
 
+  // Update userId when dbUser changes
+  React.useEffect(() => {
+    if (dbUser?.id) {
+      form.setValue("userId", dbUser.id);
+    }
+  }, [dbUser?.id, form]);
+
   const calculateHPP = () => {
     const rawMaterial = parseFloat(form.getValues("rawMaterialCost")) || 0;
     const labor = parseFloat(form.getValues("laborCost")) || 0;

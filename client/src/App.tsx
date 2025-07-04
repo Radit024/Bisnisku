@@ -25,7 +25,7 @@ function LoadingScreen() {
 }
 
 function Router() {
-  const { user, loading } = useAuth();
+  const { user, dbUser, loading } = useAuth();
 
   if (loading) {
     return <LoadingScreen />;
@@ -33,6 +33,11 @@ function Router() {
 
   if (!user) {
     return <Login />;
+  }
+
+  // Wait for dbUser to be loaded before rendering the main app
+  if (user && !dbUser) {
+    return <LoadingScreen />;
   }
 
   return (

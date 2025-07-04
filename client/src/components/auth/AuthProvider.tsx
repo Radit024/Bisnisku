@@ -32,12 +32,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       setUser(firebaseUser);
-      
+
       if (firebaseUser) {
         try {
           // Get or create user in database
           const response = await apiRequest("GET", `/api/auth/user/${firebaseUser.uid}`);
-          
+
           if (response.ok) {
             const userData = await response.json();
             setDbUser(userData);
@@ -49,7 +49,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               name: firebaseUser.displayName || firebaseUser.email!.split("@")[0],
               businessName: "",
             });
-            
+
             if (createResponse.ok) {
               const userData = await createResponse.json();
               setDbUser(userData);
@@ -61,12 +61,59 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } else {
         setDbUser(null);
       }
-      
+
       setLoading(false);
     });
 
     return unsubscribe;
   }, []);
+
+  useEffect(() => {
+    if (user && !dbUser) {
+      const createOrGetUser = async () => {
+        try {
+          setLoading(true);
+          const response = await apiRequest(`/api/auth/user/${user.uid}`, {
+            method: "POST",
+            body: JSON.stringify({
+              uid: user.uid,
+              email: user.email,
+              name: user.displayName || user.email?.split("@")[0] || "User",
+            }),
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.message || "Failed to create/get user");
+          }
+
+          const userData = await response.json();
+          if (userData && userData.id) {
+            setDbUser(userData);
+          } else {
+            throw new Error("Invalid user data received");
+          }
+        } catch (error) {
+          console.error("Error handling user authentication:", error);
+          // Don't set dbUser to null immediately, keep trying
+          setTimeout(() => {
+            if (user && !dbUser) {
+              createOrGetUser();
+            }
+          }, 2000);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      createOrGetUser();
+    } else if (!user) {
+      setDbUser(null);
+      setLoading(false);
+    } else if (user && dbUser) {
+      setLoading(false);
+    }
+  }, [user, dbUser]);
 
   return (
     <AuthContext.Provider value={{ user, dbUser, loading }}>
