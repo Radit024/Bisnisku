@@ -19,6 +19,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = await storage.createUser(userData);
       
       // Create default categories
+      // Income categories
       await storage.createTransactionCategory({
         userId: user.id,
         name: "Penjualan",
@@ -35,6 +36,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       await storage.createTransactionCategory({
         userId: user.id,
+        name: "Investasi",
+        type: "income",
+        color: "#06B6D4"
+      });
+      
+      await storage.createTransactionCategory({
+        userId: user.id,
+        name: "Bonus",
+        type: "income",
+        color: "#8B5CF6"
+      });
+      
+      await storage.createTransactionCategory({
+        userId: user.id,
+        name: "Komisi",
+        type: "income",
+        color: "#14B8A6"
+      });
+      
+      // Expense categories
+      await storage.createTransactionCategory({
+        userId: user.id,
         name: "Operasional",
         type: "expense",
         color: "#EF4444"
@@ -45,6 +68,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
         name: "Marketing",
         type: "expense",
         color: "#F97316"
+      });
+      
+      await storage.createTransactionCategory({
+        userId: user.id,
+        name: "Bahan Baku",
+        type: "expense",
+        color: "#DC2626"
+      });
+      
+      await storage.createTransactionCategory({
+        userId: user.id,
+        name: "Gaji Karyawan",
+        type: "expense",
+        color: "#B91C1C"
+      });
+      
+      await storage.createTransactionCategory({
+        userId: user.id,
+        name: "Transportasi",
+        type: "expense",
+        color: "#EA580C"
+      });
+      
+      await storage.createTransactionCategory({
+        userId: user.id,
+        name: "Listrik & Air",
+        type: "expense",
+        color: "#D97706"
+      });
+      
+      await storage.createTransactionCategory({
+        userId: user.id,
+        name: "Sewa",
+        type: "expense",
+        color: "#CA8A04"
+      });
+      
+      await storage.createTransactionCategory({
+        userId: user.id,
+        name: "Pemeliharaan",
+        type: "expense",
+        color: "#A16207"
+      });
+      
+      await storage.createTransactionCategory({
+        userId: user.id,
+        name: "Pajak",
+        type: "expense",
+        color: "#92400E"
+      });
+      
+      await storage.createTransactionCategory({
+        userId: user.id,
+        name: "Asuransi",
+        type: "expense",
+        color: "#78350F"
       });
       
       res.json(user);
