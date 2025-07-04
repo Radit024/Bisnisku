@@ -16,8 +16,7 @@ export function Navigation() {
 
   const navigation = [
     { name: "Dashboard", href: "/", current: location === "/" },
-    { name: "Pemasukan", href: "/transactions?type=income", current: location.includes("/transactions") && location.includes("income") },
-    { name: "Pengeluaran", href: "/transactions?type=expense", current: location.includes("/transactions") && location.includes("expense") },
+    { name: "Transaksi", href: "/transactions", current: location.includes("/transactions") },
     { name: "Pelanggan", href: "/customers", current: location === "/customers" },
     { name: "Laporan", href: "/reports", current: location === "/reports" },
   ];

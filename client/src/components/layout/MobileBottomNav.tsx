@@ -6,8 +6,7 @@ export function MobileBottomNav() {
 
   const navigation = [
     { name: "Dashboard", href: "/", icon: Home, current: location === "/" },
-    { name: "Masuk", href: "/transactions?type=income", icon: TrendingUp, current: location.includes("/transactions") && location.includes("income") },
-    { name: "Keluar", href: "/transactions?type=expense", icon: TrendingDown, current: location.includes("/transactions") && location.includes("expense") },
+    { name: "Transaksi", href: "/transactions", icon: TrendingUp, current: location.includes("/transactions") },
     { name: "Pelanggan", href: "/customers", icon: Users, current: location === "/customers" },
     { name: "Laporan", href: "/reports", icon: BarChart, current: location === "/reports" },
   ];
