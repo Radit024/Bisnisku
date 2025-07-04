@@ -87,7 +87,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/transactions", async (req, res) => {
     try {
-      const transactionData = insertTransactionSchema.parse(req.body);
+      const body = { ...req.body };
+      // Convert date string to Date object if it's a string
+      if (body.date && typeof body.date === 'string') {
+        body.date = new Date(body.date);
+      }
+      
+      const transactionData = insertTransactionSchema.parse(body);
       const transaction = await storage.createTransaction(transactionData);
       res.json(transaction);
     } catch (error: any) {

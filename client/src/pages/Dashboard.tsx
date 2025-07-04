@@ -20,7 +20,7 @@ export default function Dashboard() {
 
   // Fetch recent transactions
   const { data: transactions = [] } = useQuery<Transaction[]>({
-    queryKey: ["/api/transactions", dbUser?.id],
+    queryKey: [`/api/transactions?userId=${dbUser?.id}`],
     enabled: !!dbUser?.id && dbUser.id > 0,
   });
 
@@ -31,7 +31,7 @@ export default function Dashboard() {
     netProfit: "0",
     transactionCount: 0,
   } } = useQuery({
-    queryKey: ["/api/financial-summary", dbUser?.id, startOfMonth.toISOString(), endOfMonth.toISOString()],
+    queryKey: [`/api/financial-summary?userId=${dbUser?.id}&startDate=${startOfMonth.toISOString()}&endDate=${endOfMonth.toISOString()}`],
     enabled: !!dbUser?.id && dbUser.id > 0,
   });
 

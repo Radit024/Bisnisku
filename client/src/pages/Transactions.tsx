@@ -26,7 +26,7 @@ export default function Transactions() {
   const initialType = urlParams.get("type") as "income" | "expense" | null;
 
   const { data: transactions = [], isLoading } = useQuery<Transaction[]>({
-    queryKey: ["/api/transactions", dbUser?.id],
+    queryKey: [`/api/transactions?userId=${dbUser?.id}`],
     enabled: !!dbUser?.id,
   });
 
@@ -35,8 +35,8 @@ export default function Transactions() {
       await apiRequest("DELETE", `/api/transactions/${id}?userId=${dbUser?.id}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/financial-summary"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/transactions?userId=${dbUser?.id}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/financial-summary?userId=${dbUser?.id}`] });
       toast({
         title: "Transaksi berhasil dihapus",
         description: "Data transaksi telah dihapus",

@@ -20,12 +20,12 @@ export default function Customers() {
   const [isFormOpen, setIsFormOpen] = useState(false);
 
   const { data: customers = [], isLoading } = useQuery<Customer[]>({
-    queryKey: ["/api/customers", dbUser?.id],
+    queryKey: [`/api/customers?userId=${dbUser?.id}`],
     enabled: !!dbUser?.id,
   });
 
   const { data: transactions = [] } = useQuery<Transaction[]>({
-    queryKey: ["/api/transactions", dbUser?.id],
+    queryKey: [`/api/transactions?userId=${dbUser?.id}`],
     enabled: !!dbUser?.id,
   });
 

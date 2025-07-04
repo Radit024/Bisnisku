@@ -43,13 +43,13 @@ export function TransactionForm({ type, onSuccess }: TransactionFormProps) {
 
   // Fetch categories
   const { data: categories = [] } = useQuery<TransactionCategory[]>({
-    queryKey: ["/api/transaction-categories", dbUser?.id],
+    queryKey: [`/api/transaction-categories?userId=${dbUser?.id}`],
     enabled: !!dbUser?.id,
   });
 
   // Fetch customers
   const { data: customers = [] } = useQuery<Customer[]>({
-    queryKey: ["/api/customers", dbUser?.id],
+    queryKey: [`/api/customers?userId=${dbUser?.id}`],
     enabled: !!dbUser?.id,
   });
 
@@ -59,8 +59,8 @@ export function TransactionForm({ type, onSuccess }: TransactionFormProps) {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/financial-summary"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/transactions?userId=${dbUser?.id}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/financial-summary?userId=${dbUser?.id}`] });
       toast({
         title: "Transaksi berhasil ditambahkan",
         description: "Data transaksi telah disimpan",
@@ -81,7 +81,7 @@ export function TransactionForm({ type, onSuccess }: TransactionFormProps) {
     createTransactionMutation.mutate({
       ...data,
       userId: dbUser!.id,
-      date,
+      date: date.toISOString(),
       amount: data.amount.toString(),
     });
   };
