@@ -105,7 +105,7 @@ export default function Transactions() {
                 Tambah Transaksi
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl">
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Tambah Transaksi Baru</DialogTitle>
               </DialogHeader>

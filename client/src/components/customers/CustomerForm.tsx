@@ -66,7 +66,7 @@ export function CustomerForm({ onSuccess }: CustomerFormProps) {
       <CardHeader>
         <CardTitle>Tambah Pelanggan Baru</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="max-h-[70vh] overflow-y-auto px-4 sm:px-6">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
