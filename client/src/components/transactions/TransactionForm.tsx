@@ -188,14 +188,14 @@ export function TransactionForm({ type, onSuccess }: TransactionFormProps) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Pelanggan (Opsional)</FormLabel>
-                    <Select onValueChange={(value) => field.onChange(value ? parseInt(value) : undefined)} value={field.value?.toString()}>
+                    <Select onValueChange={(value) => field.onChange(value === "none" ? undefined : parseInt(value))} value={field.value?.toString() || "none"}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Pilih pelanggan" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="">Tidak ada pelanggan</SelectItem>
+                        <SelectItem value="none">Tidak ada pelanggan</SelectItem>
                         {customers.map((customer) => (
                           <SelectItem key={customer.id} value={customer.id.toString()}>
                             {customer.name}
