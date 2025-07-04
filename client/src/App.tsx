@@ -36,7 +36,7 @@ function Router() {
   }
 
   // Wait for dbUser to be loaded before rendering the main app
-  if (user && !dbUser) {
+  if (user && !dbUser && !loading) {
     return <LoadingScreen />;
   }
 

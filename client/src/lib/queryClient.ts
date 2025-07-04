@@ -9,21 +9,21 @@ async function throwIfResNotOk(res: Response) {
 
 export async function apiRequest(
   method: string,
-  url: string,
-  data?: unknown | undefined,
+  endpoint: string,
+  data?: any
 ): Promise<Response> {
-  const baseUrl = import.meta.env.VITE_API_URL || '';
-  const fullUrl = url.startsWith('http') ? url : `${baseUrl}${url}`;
-  
-  const res = await fetch(fullUrl, {
+  const options: RequestInit = {
     method,
-    headers: data ? { "Content-Type": "application/json" } : {},
-    body: data ? JSON.stringify(data) : undefined,
-    credentials: "include",
-  });
+    headers: {
+      "Content-Type": "application/json",
+    },
+  };
 
-  await throwIfResNotOk(res);
-  return res;
+  if (data && (method === "POST" || method === "PUT" || method === "PATCH")) {
+    options.body = JSON.stringify(data);
+  }
+
+  return fetch(endpoint, options);
 }
 
 type UnauthorizedBehavior = "returnNull" | "throw";
@@ -35,7 +35,7 @@ export const getQueryFn: <T>(options: {
     const baseUrl = import.meta.env.VITE_API_URL || '';
     const url = queryKey[0] as string;
     const fullUrl = url.startsWith('http') ? url : `${baseUrl}${url}`;
-    
+
     const res = await fetch(fullUrl, {
       credentials: "include",
     });
