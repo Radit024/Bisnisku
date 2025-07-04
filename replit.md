@@ -118,6 +118,12 @@ BisnisMu is a comprehensive business management application designed for Indones
 ```
 Changelog:
 - July 04, 2025. Initial setup
+- July 04, 2025. Separated client and server packages for independent deployment
+  - Client: React frontend for Vercel deployment
+  - Server: Express.js backend for Railway/Google Cloud Run deployment
+  - Added CORS configuration for production deployment
+  - Created separate package.json files for each service
+  - Added deployment documentation and Docker configuration
 ```
 
 ## User Preferences
