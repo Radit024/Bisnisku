@@ -57,7 +57,7 @@ export function Navigation() {
                       className={`text-sm font-medium ${
                         item.current 
                           ? "bg-primary text-primary-foreground" 
-                          : "text-muted-foreground hover:text-primary"
+                          : "text-muted-foreground hover:text-primary hover:bg-primary/10"
                       }`}
                     >
                       {item.name}
@@ -122,7 +122,7 @@ export function Navigation() {
                     className={`w-full justify-start ${
                       item.current 
                         ? "bg-primary text-primary-foreground" 
-                        : "text-muted-foreground hover:text-primary"
+                        : "text-muted-foreground hover:text-primary hover:bg-primary/10"
                     }`}
                     onClick={() => setMobileMenuOpen(false)}
                   >
