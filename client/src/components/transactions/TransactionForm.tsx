@@ -128,10 +128,15 @@ export function TransactionForm({ type, onSuccess }: TransactionFormProps) {
                   <FormLabel>Jumlah (IDR)</FormLabel>
                   <FormControl>
                     <Input
-                      type="number"
+                      type="text"
                       placeholder="0"
-                      {...field}
-                      onChange={(e) => field.onChange(e.target.value)}
+                      value={field.value ? new Intl.NumberFormat('id-ID').format(parseFloat(field.value.toString().replace(/\./g, ''))) : ''}
+                      onChange={(e) => {
+                        const numericValue = e.target.value.replace(/\./g, '');
+                        if (numericValue === '' || /^\d+$/.test(numericValue)) {
+                          field.onChange(numericValue);
+                        }
+                      }}
                     />
                   </FormControl>
                   <FormMessage />
