@@ -176,9 +176,9 @@ export default function Reports() {
 
       <Tabs defaultValue="financial-report" className="space-y-6">
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="financial-report">Laporan Keuangan</TabsTrigger>
-          <TabsTrigger value="bep-analysis">Analisis BEP</TabsTrigger>
-          <TabsTrigger value="hpp-calculator">Kalkulator HPP</TabsTrigger>
+          <TabsTrigger value="financial-report" className="hover:bg-primary/10 hover:text-primary data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Laporan Keuangan</TabsTrigger>
+          <TabsTrigger value="bep-analysis" className="hover:bg-secondary/10 hover:text-secondary data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground">Analisis BEP</TabsTrigger>
+          <TabsTrigger value="hpp-calculator" className="hover:bg-accent/10 hover:text-accent data-[state=active]:bg-accent data-[state=active]:text-accent-foreground">Kalkulator HPP</TabsTrigger>
         </TabsList>
 
         <TabsContent value="financial-report" className="space-y-6">
