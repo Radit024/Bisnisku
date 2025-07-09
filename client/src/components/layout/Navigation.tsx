@@ -3,7 +3,7 @@ import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { ChartLine, Bell, Menu, ChevronDown, LogOut } from "lucide-react";
+import { ChartLine, Bell, Menu, ChevronDown, LogOut, User, Settings } from "lucide-react";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { signOutUser } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
@@ -46,7 +46,7 @@ export function Navigation() {
               <ChartLine className="text-primary text-2xl mr-3" />
               <h1 className="text-xl font-bold text-primary">BisnisMu</h1>
             </div>
-            
+
             {/* Desktop Navigation */}
             <div className="hidden md:block ml-10">
               <div className="flex items-baseline space-x-4">
@@ -67,7 +67,7 @@ export function Navigation() {
               </div>
             </div>
           </div>
-          
+
           <div className="flex items-center space-x-4">
             {/* Notifications */}
             <Button variant="ghost" size="icon" className="relative">
@@ -76,7 +76,7 @@ export function Navigation() {
                 3
               </span>
             </Button>
-            
+
             {/* Profile Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -91,14 +91,37 @@ export function Navigation() {
                   <ChevronDown className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={handleSignOut}>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">{dbUser?.name || "User"}</p>
+                    <p className="text-xs leading-none text-muted-foreground">
+                      {user?.email}
+                    </p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild className="hover:bg-primary/10 hover:text-primary cursor-pointer">
+                  <Link href="/edit-profile">
+                    <User className="mr-2 h-4 w-4" />
+                    <span>Edit Profile</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem className="hover:bg-secondary/10 hover:text-secondary cursor-pointer">
+                  <Settings className="mr-2 h-4 w-4" />
+                  <span>Settings</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem 
+                  onClick={handleSignOut}
+                  className="hover:bg-destructive/10 hover:text-destructive cursor-pointer"
+                >
                   <LogOut className="mr-2 h-4 w-4" />
-                  Keluar
+                  <span>Log out</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            
+
             {/* Mobile menu button */}
             <Button
               variant="ghost"
@@ -110,7 +133,7 @@ export function Navigation() {
             </Button>
           </div>
         </div>
-        
+
         {/* Mobile Navigation */}
         {mobileMenuOpen && (
           <div className="md:hidden">

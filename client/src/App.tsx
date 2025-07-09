@@ -12,6 +12,7 @@ import Dashboard from "@/pages/Dashboard";
 import Transactions from "@/pages/Transactions";
 import Customers from "@/pages/Customers";
 import Reports from "@/pages/Reports";
+import { lazy } from "react";
 
 function LoadingScreen() {
   return (
@@ -49,6 +50,7 @@ function Router() {
           <Route path="/transactions" component={Transactions} />
           <Route path="/customers" component={Customers} />
           <Route path="/reports" component={Reports} />
+          <Route path="/edit-profile" component={lazy(() => import("./pages/EditProfile"))} />
           <Route component={NotFound} />
         </Switch>
       </main>
