@@ -1,7 +1,4 @@
-import ws from "ws";
-import * as schema from "@shared/schema";
-import { MongoClient, ObjectId } from 'mongodb';
-import type { Db, Collection } from 'mongodb';
+import { MongoClient, Db, Collection } from 'mongodb';
 import {
   User,
   Customer,
@@ -9,25 +6,14 @@ import {
   Transaction,
   HppCalculation,
   BusinessSettings
-} from '@shared/schema';
-
-neonConfig.webSocketConstructor = ws;
-
-if (!process.env.DATABASE_URL) {
-  throw new Error(
-    "DATABASE_URL must be set. Did you forget to provision a database?",
-  );
-}
-
-export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-export const db = drizzle({ client: pool, schema });
+} from '@shared/mongodb-schema';
 
 if (!process.env.MONGODB_URI) {
   throw new Error('MONGODB_URI must be set in environment variables');
 }
 
 class MongoDB {
-  private client: any;
+  private client: MongoClient;
   private db: Db;
   private static instance: MongoDB;
 
@@ -108,7 +94,7 @@ class MongoDB {
       // Business settings indexes
       await this.businessSettings.createIndex({ userId: 1 }, { unique: true });
 
-      console.log('MongoDB indexes created successfully');
+      console.log('Indexes created successfully');
     } catch (error) {
       console.error('Error creating indexes:', error);
       throw error;
@@ -117,13 +103,4 @@ class MongoDB {
 }
 
 export const mongodb = MongoDB.getInstance();
-
-// Connect to MongoDB on server start
-export const connectDB = async () => {
-  await mongodb.connect();
-  await mongodb.createIndexes();
-};
-
-// Export mongodb instance for use in other files
-export { mongodb as db };
-export { ObjectId };
+export default mongodb;

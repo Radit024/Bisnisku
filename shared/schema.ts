@@ -1,168 +1,109 @@
-import { pgTable, text, serial, integer, boolean, timestamp, decimal, varchar, uuid } from "drizzle-orm/pg-core";
-import { createInsertSchema } from "drizzle-zod";
-import { z } from "zod";
-import { relations } from "drizzle-orm";
+import { z } from 'zod';
 
-export const users = pgTable("users", {
-  id: serial("id").primaryKey(),
-  firebaseUid: varchar("firebase_uid", { length: 128 }).unique().notNull(),
-  email: text("email").notNull().unique(),
-  name: text("name").notNull(),
-  businessName: text("business_name"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+// Base schemas - We'll validate ObjectId at runtime
+export const objectIdSchema = z.string().refine((val) => {
+  try {
+    // This will work in server environment where ObjectId is available
+    const { ObjectId } = require('mongodb');
+    return ObjectId.isValid(val);
+  } catch {
+    // Fallback for client environment
+    return /^[0-9a-fA-F]{24}$/.test(val);
+  }
+}, {
+  message: 'Invalid ObjectId',
 });
 
-export const customers = pgTable("customers", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  name: text("name").notNull(),
-  email: text("email"),
-  phone: text("phone"),
-  address: text("address"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+// User Schema
+export const userSchema = z.object({
+  _id: objectIdSchema.optional(),
+  firebaseUid: z.string().min(1),
+  email: z.string().email(),
+  name: z.string().min(1),
+  businessName: z.string().optional(),
+  createdAt: z.date().default(() => new Date()),
 });
 
-export const transactionCategories = pgTable("transaction_categories", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  name: text("name").notNull(),
-  type: varchar("type", { length: 10 }).notNull(), // 'income' or 'expense'
-  color: varchar("color", { length: 7 }).default("#059669"),
+// Customer Schema
+export const customerSchema = z.object({
+  _id: objectIdSchema.optional(),
+  userId: objectIdSchema,
+  name: z.string().min(1),
+  email: z.string().email().optional(),
+  phone: z.string().optional(),
+  address: z.string().optional(),
+  createdAt: z.date().default(() => new Date()),
 });
 
-export const transactions = pgTable("transactions", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  customerId: integer("customer_id").references(() => customers.id),
-  categoryId: integer("category_id").references(() => transactionCategories.id),
-  type: varchar("type", { length: 10 }).notNull(), // 'income' or 'expense'
-  amount: decimal("amount", { precision: 15, scale: 2 }).notNull(),
-  description: text("description").notNull(),
-  date: timestamp("date").notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+// Transaction Category Schema
+export const transactionCategorySchema = z.object({
+  _id: objectIdSchema.optional(),
+  userId: objectIdSchema,
+  name: z.string().min(1),
+  type: z.enum(['income', 'expense']),
+  color: z.string().default('#059669'),
 });
 
-export const hppCalculations = pgTable("hpp_calculations", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  productName: text("product_name").notNull(),
-  rawMaterialCost: decimal("raw_material_cost", { precision: 15, scale: 2 }).notNull(),
-  laborCost: decimal("labor_cost", { precision: 15, scale: 2 }).notNull(),
-  overheadCost: decimal("overhead_cost", { precision: 15, scale: 2 }).notNull(),
-  totalUnits: integer("total_units").notNull(),
-  totalHPP: decimal("total_hpp", { precision: 15, scale: 2 }).notNull(),
-  hppPerUnit: decimal("hpp_per_unit", { precision: 15, scale: 2 }).notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+// Transaction Schema
+export const transactionSchema = z.object({
+  _id: objectIdSchema.optional(),
+  userId: objectIdSchema,
+  customerId: objectIdSchema.optional(),
+  categoryId: objectIdSchema.optional(),
+  type: z.enum(['income', 'expense']),
+  amount: z.number().positive(),
+  description: z.string().min(1),
+  date: z.date(),
+  createdAt: z.date().default(() => new Date()),
 });
 
-export const businessSettings = pgTable("business_settings", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  fixedCosts: decimal("fixed_costs", { precision: 15, scale: 2 }).default("0"),
-  targetProfit: decimal("target_profit", { precision: 15, scale: 2 }).default("0"),
-  averageSellingPrice: decimal("average_selling_price", { precision: 15, scale: 2 }).default("0"),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+// HPP Calculation Schema
+export const hppCalculationSchema = z.object({
+  _id: objectIdSchema.optional(),
+  userId: objectIdSchema,
+  productName: z.string().min(1),
+  rawMaterialCost: z.number().nonnegative(),
+  laborCost: z.number().nonnegative(),
+  overheadCost: z.number().nonnegative(),
+  totalUnits: z.number().positive().int(),
+  totalHPP: z.number().nonnegative(),
+  hppPerUnit: z.number().nonnegative(),
+  createdAt: z.date().default(() => new Date()),
 });
 
-// Relations
-export const usersRelations = relations(users, ({ many, one }) => ({
-  customers: many(customers),
-  transactions: many(transactions),
-  categories: many(transactionCategories),
-  hppCalculations: many(hppCalculations),
-  businessSettings: one(businessSettings),
-}));
-
-export const customersRelations = relations(customers, ({ one, many }) => ({
-  user: one(users, {
-    fields: [customers.userId],
-    references: [users.id],
-  }),
-  transactions: many(transactions),
-}));
-
-export const transactionCategoriesRelations = relations(transactionCategories, ({ one, many }) => ({
-  user: one(users, {
-    fields: [transactionCategories.userId],
-    references: [users.id],
-  }),
-  transactions: many(transactions),
-}));
-
-export const transactionsRelations = relations(transactions, ({ one }) => ({
-  user: one(users, {
-    fields: [transactions.userId],
-    references: [users.id],
-  }),
-  customer: one(customers, {
-    fields: [transactions.customerId],
-    references: [customers.id],
-  }),
-  category: one(transactionCategories, {
-    fields: [transactions.categoryId],
-    references: [transactionCategories.id],
-  }),
-}));
-
-export const hppCalculationsRelations = relations(hppCalculations, ({ one }) => ({
-  user: one(users, {
-    fields: [hppCalculations.userId],
-    references: [users.id],
-  }),
-}));
-
-export const businessSettingsRelations = relations(businessSettings, ({ one }) => ({
-  user: one(users, {
-    fields: [businessSettings.userId],
-    references: [users.id],
-  }),
-}));
-
-// Insert schemas
-export const insertUserSchema = createInsertSchema(users).omit({
-  id: true,
-  createdAt: true,
+// Business Settings Schema
+export const businessSettingsSchema = z.object({
+  _id: objectIdSchema.optional(),
+  userId: objectIdSchema,
+  fixedCosts: z.number().nonnegative().default(0),
+  targetProfit: z.number().nonnegative().default(0),
+  averageSellingPrice: z.number().nonnegative().default(0),
+  updatedAt: z.date().default(() => new Date()),
 });
 
-export const insertCustomerSchema = createInsertSchema(customers).omit({
-  id: true,
-  createdAt: true,
-});
-
-export const insertTransactionCategorySchema = createInsertSchema(transactionCategories).omit({
-  id: true,
-});
-
-export const insertTransactionSchema = createInsertSchema(transactions).omit({
-  id: true,
-  createdAt: true,
-});
-
-export const insertHppCalculationSchema = createInsertSchema(hppCalculations).omit({
-  id: true,
-  createdAt: true,
-});
-
-export const insertBusinessSettingsSchema = createInsertSchema(businessSettings).omit({
-  id: true,
-  updatedAt: true,
-});
+// Insert schemas (without _id for new documents)
+export const insertUserSchema = userSchema.omit({ _id: true, createdAt: true });
+export const insertCustomerSchema = customerSchema.omit({ _id: true, createdAt: true });
+export const insertTransactionCategorySchema = transactionCategorySchema.omit({ _id: true });
+export const insertTransactionSchema = transactionSchema.omit({ _id: true, createdAt: true });
+export const insertHppCalculationSchema = hppCalculationSchema.omit({ _id: true, createdAt: true });
+export const insertBusinessSettingsSchema = businessSettingsSchema.omit({ _id: true, updatedAt: true });
 
 // Types
-export type User = typeof users.$inferSelect;
+export type User = z.infer<typeof userSchema>;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 
-export type Customer = typeof customers.$inferSelect;
+export type Customer = z.infer<typeof customerSchema>;
 export type InsertCustomer = z.infer<typeof insertCustomerSchema>;
 
-export type TransactionCategory = typeof transactionCategories.$inferSelect;
+export type TransactionCategory = z.infer<typeof transactionCategorySchema>;
 export type InsertTransactionCategory = z.infer<typeof insertTransactionCategorySchema>;
 
-export type Transaction = typeof transactions.$inferSelect;
+export type Transaction = z.infer<typeof transactionSchema>;
 export type InsertTransaction = z.infer<typeof insertTransactionSchema>;
 
-export type HppCalculation = typeof hppCalculations.$inferSelect;
+export type HppCalculation = z.infer<typeof hppCalculationSchema>;
 export type InsertHppCalculation = z.infer<typeof insertHppCalculationSchema>;
 
-export type BusinessSettings = typeof businessSettings.$inferSelect;
+export type BusinessSettings = z.infer<typeof businessSettingsSchema>;
 export type InsertBusinessSettings = z.infer<typeof insertBusinessSettingsSchema>;
