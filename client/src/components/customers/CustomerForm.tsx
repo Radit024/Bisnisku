@@ -1,27 +1,21 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { insertCustomerSchema, type InsertCustomer } from "@shared/schema";
-import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/components/auth/AuthProvider";
-import { useToast } from "@/hooks/use-toast";
-
-interface CustomerFormProps {
-  onSuccess?: () => void;
-}
+import { useCreateCustomer } from "@/controllers/customer.controller";
+import { customerValidationSchema } from "@/utils/validation";
+import type { InsertCustomer, CustomerFormProps } from "@/types";
 
 export function CustomerForm({ onSuccess }: CustomerFormProps) {
   const { dbUser } = useAuth();
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
+  const createCustomerMutation = useCreateCustomer();
 
   const form = useForm<InsertCustomer>({
-    resolver: zodResolver(insertCustomerSchema),
+    resolver: zodResolver(customerValidationSchema),
     defaultValues: {
       userId: dbUser?.id || 0,
       name: "",
@@ -31,34 +25,16 @@ export function CustomerForm({ onSuccess }: CustomerFormProps) {
     },
   });
 
-  const createCustomerMutation = useMutation({
-    mutationFn: async (data: InsertCustomer) => {
-      const response = await apiRequest("POST", "/api/customers", data);
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/customers"] });
-      toast({
-        title: "Pelanggan berhasil ditambahkan",
-        description: "Data pelanggan telah disimpan",
-      });
-      form.reset();
-      onSuccess?.();
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Gagal menambahkan pelanggan",
-        description: error.message || "Terjadi kesalahan",
-        variant: "destructive",
-      });
-    },
-  });
+  const onSubmit = async (data: InsertCustomer) => {
+    if (!dbUser) return;
 
-  const onSubmit = (data: InsertCustomer) => {
-    createCustomerMutation.mutate({
+    await createCustomerMutation.mutateAsync({
       ...data,
-      userId: dbUser!.id,
+      userId: dbUser.id,
     });
+    
+    form.reset();
+    onSuccess?.();
   };
 
   return (

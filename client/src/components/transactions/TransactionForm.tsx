@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -11,79 +10,45 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CalendarIcon } from "lucide-react";
-import { format } from "date-fns";
-import { id } from "date-fns/locale";
-import { insertTransactionSchema, type InsertTransaction, type TransactionCategory, type Customer } from "@shared/schema";
-import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/components/auth/AuthProvider";
-import { useToast } from "@/hooks/use-toast";
+import { useCreateTransaction, useTransactionCategories } from "@/controllers/transaction.controller";
+import { useCustomers } from "@/controllers/customer.controller";
+import { transactionValidationSchema } from "@/utils/validation";
+import { formatDate } from "@/utils/date";
 import { cn } from "@/lib/utils";
-
-interface TransactionFormProps {
-  type?: "income" | "expense";
-  onSuccess?: () => void;
-}
+import type { InsertTransaction, TransactionFormProps } from "@/types";
 
 export function TransactionForm({ type, onSuccess }: TransactionFormProps) {
   const { dbUser } = useAuth();
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
   const [date, setDate] = useState<Date>(new Date());
+  
+  const createTransactionMutation = useCreateTransaction();
+  const { data: categories = [] } = useTransactionCategories();
+  const { data: customers = [] } = useCustomers();
 
   const form = useForm<InsertTransaction>({
-    resolver: zodResolver(insertTransactionSchema),
+    resolver: zodResolver(transactionValidationSchema),
     defaultValues: {
       userId: dbUser?.id || 0,
       type: type || "income",
-      amount: "",
+      amount: 0,
       description: "",
       date: new Date(),
+      categoryId: 0,
     },
   });
 
-  // Fetch categories
-  const { data: categories = [] } = useQuery<TransactionCategory[]>({
-    queryKey: [`/api/transaction-categories?userId=${dbUser?.id}`],
-    enabled: !!dbUser?.id,
-  });
+  const onSubmit = async (data: InsertTransaction) => {
+    if (!dbUser) return;
 
-  // Fetch customers
-  const { data: customers = [] } = useQuery<Customer[]>({
-    queryKey: [`/api/customers?userId=${dbUser?.id}`],
-    enabled: !!dbUser?.id,
-  });
-
-  const createTransactionMutation = useMutation({
-    mutationFn: async (data: InsertTransaction) => {
-      const response = await apiRequest("POST", "/api/transactions", data);
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/transactions?userId=${dbUser?.id}`] });
-      queryClient.invalidateQueries({ queryKey: [`/api/financial-summary?userId=${dbUser?.id}`] });
-      toast({
-        title: "Transaksi berhasil ditambahkan",
-        description: "Data transaksi telah disimpan",
-      });
-      form.reset();
-      onSuccess?.();
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Gagal menambahkan transaksi",
-        description: error.message || "Terjadi kesalahan",
-        variant: "destructive",
-      });
-    },
-  });
-
-  const onSubmit = (data: InsertTransaction) => {
-    createTransactionMutation.mutate({
+    await createTransactionMutation.mutateAsync({
       ...data,
-      userId: dbUser!.id,
-      date: date.toISOString(),
-      amount: data.amount.toString(),
+      userId: dbUser.id,
+      date: date,
     });
+    
+    form.reset();
+    onSuccess?.();
   };
 
   const filteredCategories = categories.filter(cat => cat.type === form.watch("type"));
