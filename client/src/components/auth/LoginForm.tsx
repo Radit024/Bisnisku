@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { signInWithGoogle, signInWithEmail, signUpWithEmail } from "@/lib/firebase";
-import { ChartLine, Mail, Lock, Chrome } from "lucide-react";
+import { TrendingUp, Mail, Lock, Chrome } from "lucide-react";
 
 export function LoginForm() {
   const [email, setEmail] = useState("");
@@ -24,7 +24,7 @@ export function LoginForm() {
         await signUpWithEmail(email, password);
         toast({
           title: "Akun berhasil dibuat",
-          description: "Selamat datang di BisnisMu!",
+          description: "Selamat datang di BisnisKu!",
         });
       } else {
         await signInWithEmail(email, password);
@@ -50,7 +50,7 @@ export function LoginForm() {
       await signInWithGoogle();
       toast({
         title: "Berhasil masuk",
-        description: "Selamat datang di BisnisMu!",
+        description: "Selamat datang di BisnisKu!",
       });
     } catch (error: any) {
       toast({
@@ -68,8 +68,8 @@ export function LoginForm() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex items-center justify-center mb-4">
-            <ChartLine className="h-8 w-8 text-primary mr-2" />
-            <h1 className="text-2xl font-bold text-primary">BisnisMu</h1>
+            <TrendingUp className="h-8 w-8 text-primary mr-2" />
+            <h1 className="text-2xl font-bold text-primary">BisnisKu</h1>
           </div>
           <CardTitle className="text-xl">
             {isSignUp ? "Buat Akun Baru" : "Masuk ke Akun Anda"}

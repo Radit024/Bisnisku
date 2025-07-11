@@ -1,6 +1,6 @@
-# BisnisMu Client
+# BisnisKu Client
 
-React frontend for the BisnisMu business management application.
+React frontend for the BisnisKu business management application.
 
 ## Environment Variables
 

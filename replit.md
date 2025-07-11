@@ -1,8 +1,8 @@
-# BisnisMu - Business Management Application
+# BisnisKu - Business Management Application
 
 ## Overview
 
-BisnisMu is a comprehensive business management application designed for Indonesian small to medium businesses. It provides financial tracking, customer management, transaction recording, and business analytics capabilities. The application is built as a full-stack web application with a React frontend and Express.js backend, featuring Firebase authentication and PostgreSQL database storage.
+BisnisKu is a comprehensive business management application designed for Indonesian small to medium businesses. It provides financial tracking, customer management, transaction recording, and business analytics capabilities. The application is built as a full-stack web application with a React frontend and Express.js backend, featuring Firebase authentication and PostgreSQL database storage.
 
 ## System Architecture
 

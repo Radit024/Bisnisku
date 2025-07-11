@@ -1,10 +1,7 @@
-import type { Express } from "express";
-import { createServer, type Server } from "http";
-import { storage } from "./storage";
-import { insertUserSchema, insertCustomerSchema, insertTransactionSchema, insertHppCalculationSchema, insertBusinessSettingsSchema } from "@shared/schema";
-import { z } from "zod";
+import { createServer } from "http";
+import { insertUserSchema, insertCustomerSchema, insertTransactionSchema, insertHppCalculationSchema, insertBusinessSettingsSchema } from "./schema.js"
 
-export async function registerRoutes(app: Express): Promise<Server> {
+export async function registerRoutes(app, storage) {
   // Auth routes
   app.post("/api/auth/register", async (req, res) => {
     try {
@@ -83,7 +80,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       res.json(user);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error creating user:", error);
       res.status(400).json({ message: error.message });
     }
@@ -96,7 +93,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "User not found" });
       }
       res.json(user);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error getting user:", error);
       res.status(500).json({ message: error.message });
     }
@@ -105,8 +102,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Transaction routes
   app.get("/api/transactions", async (req, res) => {
     try {
-      const userId = parseInt(req.query.userId as string);
-      const limit = req.query.limit ? parseInt(req.query.limit as string) : undefined;
+      const userId = parseInt(req.query.userId);
+      const limit = req.query.limit ? parseInt(req.query.limit) : undefined;
 
       if (!userId) {
         return res.status(400).json({ message: "User ID is required" });
@@ -114,7 +111,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const transactions = await storage.getTransactions(userId, limit);
       res.json(transactions);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error getting transactions:", error);
       res.status(500).json({ message: error.message });
     }
@@ -131,7 +128,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const transactionData = insertTransactionSchema.parse(body);
       const transaction = await storage.createTransaction(transactionData);
       res.json(transaction);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error creating transaction:", error);
       res.status(400).json({ message: error.message });
     }
@@ -140,7 +137,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/transactions/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const userId = parseInt(req.query.userId as string);
+      const userId = parseInt(req.query.userId);
       const transactionData = insertTransactionSchema.partial().parse(req.body);
 
       const transaction = await storage.updateTransaction(id, transactionData, userId);
@@ -149,7 +146,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       res.json(transaction);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error updating transaction:", error);
       res.status(400).json({ message: error.message });
     }
@@ -158,7 +155,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/transactions/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const userId = parseInt(req.query.userId as string);
+      const userId = parseInt(req.query.userId);
 
       const success = await storage.deleteTransaction(id, userId);
       if (!success) {
@@ -166,7 +163,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       res.json({ success: true });
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error deleting transaction:", error);
       res.status(500).json({ message: error.message });
     }
@@ -175,7 +172,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Customer routes
   app.get("/api/customers", async (req, res) => {
     try {
-      const userId = parseInt(req.query.userId as string);
+      const userId = parseInt(req.query.userId);
 
       if (!userId) {
         return res.status(400).json({ message: "User ID is required" });
@@ -183,7 +180,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const customers = await storage.getCustomers(userId);
       res.json(customers);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error getting customers:", error);
       res.status(500).json({ message: error.message });
     }
@@ -194,7 +191,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const customerData = insertCustomerSchema.parse(req.body);
       const customer = await storage.createCustomer(customerData);
       res.json(customer);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error creating customer:", error);
       res.status(400).json({ message: error.message });
     }
@@ -203,7 +200,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/customers/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const userId = parseInt(req.query.userId as string);
+      const userId = parseInt(req.query.userId);
       const customerData = insertCustomerSchema.partial().parse(req.body);
 
       const customer = await storage.updateCustomer(id, customerData, userId);
@@ -212,7 +209,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       res.json(customer);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error updating customer:", error);
       res.status(400).json({ message: error.message });
     }
@@ -221,7 +218,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/customers/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const userId = parseInt(req.query.userId as string);
+      const userId = parseInt(req.query.userId);
 
       const success = await storage.deleteCustomer(id, userId);
       if (!success) {
@@ -229,7 +226,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       res.json({ success: true });
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error deleting customer:", error);
       res.status(500).json({ message: error.message });
     }
@@ -238,7 +235,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Transaction categories routes
   app.get("/api/transaction-categories", async (req, res) => {
     try {
-      const userId = parseInt(req.query.userId as string);
+      const userId = parseInt(req.query.userId);
 
       if (!userId) {
         return res.status(400).json({ message: "User ID is required" });
@@ -246,7 +243,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const categories = await storage.getTransactionCategories(userId);
       res.json(categories);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error getting transaction categories:", error);
       res.status(500).json({ message: error.message });
     }
@@ -255,7 +252,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // HPP calculations routes
   app.get("/api/hpp-calculations", async (req, res) => {
     try {
-      const userId = parseInt(req.query.userId as string);
+      const userId = parseInt(req.query.userId);
 
       if (!userId) {
         return res.status(400).json({ message: "User ID is required" });
@@ -263,7 +260,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const calculations = await storage.getHppCalculations(userId);
       res.json(calculations);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error getting HPP calculations:", error);
       res.status(500).json({ message: error.message });
     }
@@ -274,7 +271,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const calculationData = insertHppCalculationSchema.parse(req.body);
       const calculation = await storage.createHppCalculation(calculationData);
       res.json(calculation);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error creating HPP calculation:", error);
       res.status(400).json({ message: error.message });
     }
@@ -283,7 +280,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Business settings routes
   app.get("/api/business-settings", async (req, res) => {
     try {
-      const userId = parseInt(req.query.userId as string);
+      const userId = parseInt(req.query.userId);
 
       if (!userId) {
         return res.status(400).json({ message: "User ID is required" });
@@ -291,7 +288,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const settings = await storage.getBusinessSettings(userId);
       res.json(settings || { userId, fixedCosts: "0", targetProfit: "0", averageSellingPrice: "0" });
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error getting business settings:", error);
       res.status(500).json({ message: error.message });
     }
@@ -302,7 +299,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const settingsData = insertBusinessSettingsSchema.parse(req.body);
       const settings = await storage.upsertBusinessSettings(settingsData);
       res.json(settings);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error saving business settings:", error);
       res.status(400).json({ message: error.message });
     }
@@ -311,9 +308,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Financial summary route
   app.get("/api/financial-summary", async (req, res) => {
     try {
-      const userId = parseInt(req.query.userId as string);
-      const startDate = new Date(req.query.startDate as string);
-      const endDate = new Date(req.query.endDate as string);
+      const userId = parseInt(req.query.userId);
+      const startDate = new Date(req.query.startDate);
+      const endDate = new Date(req.query.endDate);
 
       if (!userId) {
         return res.status(400).json({ message: "User ID is required" });
@@ -321,7 +318,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const summary = await storage.getFinancialSummary(userId, startDate, endDate);
       res.json(summary);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error getting financial summary:", error);
       res.status(500).json({ message: error.message });
     }

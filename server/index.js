@@ -1,8 +1,10 @@
-import express, { type Request, Response, NextFunction } from "express";
+import express from "express";
 import cors from "cors";
-import { registerRoutes } from "./routes";
-import { setupVite, serveStatic, log } from "./vite";
-import { connectDB } from "./db";
+import { registerRoutes } from "./routes.js";
+import { setupVite, serveStatic, log } from "./vite.js";
+import DatabaseStorage from "./storage.js";
+import mongodb from "./mongodb.js";
+import dotenv from "dotenv";
 
 const app = express();
 
@@ -22,7 +24,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
-  let capturedJsonResponse: Record<string, any> | undefined = undefined;
+  let capturedJsonResponse = undefined;
 
   const originalResJson = res.json;
   res.json = function (bodyJson, ...args) {
@@ -50,14 +52,22 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  // Load environment variables from .env file
+  dotenv.config();
+  if (!process.env.MONGODB_URI) {
+    throw new Error("MONGODB_URI must be set in environment variables");
+  }
   try {
     // Connect to MongoDB
-    await connectDB();
+    const mongoDB = await mongodb.getInstance();
+    await mongoDB.connect();
     log("Connected to MongoDB successfully");
 
-    const server = await registerRoutes(app);
+    const storage = new DatabaseStorage(mongoDB);
 
-    app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+    const server = await registerRoutes(app, storage);
+
+    app.use((err, _req, res, _next) => {
       const status = err.status || err.statusCode || 500;
       const message = err.message || "Internal Server Error";
 
@@ -80,8 +90,7 @@ app.use((req, res, next) => {
     const port = 5000;
     server.listen({
       port,
-      host: "0.0.0.0",
-      reusePort: true,
+      host: "0.0.0.0"
     }, () => {
       log(`serving on port ${port}`);
     });

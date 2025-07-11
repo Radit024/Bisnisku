@@ -1,9 +1,9 @@
 import { ObjectId } from 'mongodb';
 import { db } from '../db';
-import { User, InsertUser, userSchema, insertUserSchema } from '@shared/schema';
+import { userSchema, insertUserSchema } from '@shared/schema';
 
 export class UserService {
-  async createUser(userData: InsertUser): Promise<User> {
+  async createUser(userData) {
     const validatedData = insertUserSchema.parse(userData);
     
     const userWithTimestamp = {
@@ -11,7 +11,7 @@ export class UserService {
       createdAt: new Date(),
     };
 
-    const result = await db.users.insertOne(userWithTimestamp);
+    const result = await db.users.insertOne(userWithTimestamp); 
     
     const user = await db.users.findOne({ _id: result.insertedId });
     if (!user) {
@@ -21,24 +21,24 @@ export class UserService {
     return userSchema.parse(user);
   }
 
-  async getUserById(id: string): Promise<User | null> {
-    const user = await db.users.findOne({ _id: new ObjectId(id) });
+  async getUserById(id) {
+    const user = await db.users.findOne({ _id: id });
     return user ? userSchema.parse(user) : null;
   }
 
-  async getUserByFirebaseUid(firebaseUid: string): Promise<User | null> {
+  async getUserByFirebaseUid(firebaseUid) {
     const user = await db.users.findOne({ firebaseUid });
     return user ? userSchema.parse(user) : null;
   }
 
-  async getUserByEmail(email: string): Promise<User | null> {
+  async getUserByEmail(email) {
     const user = await db.users.findOne({ email });
     return user ? userSchema.parse(user) : null;
   }
 
-  async updateUser(id: string, userData: Partial<InsertUser>): Promise<User | null> {
+  async updateUser(id, userData) {
     const result = await db.users.findOneAndUpdate(
-      { _id: new ObjectId(id) },
+      { _id: id },
       { $set: userData },
       { returnDocument: 'after' }
     );
@@ -46,8 +46,8 @@ export class UserService {
     return result ? userSchema.parse(result) : null;
   }
 
-  async deleteUser(id: string): Promise<boolean> {
-    const result = await db.users.deleteOne({ _id: new ObjectId(id) });
+  async deleteUser(id) {
+    const result = await db.users.deleteOne({ _id: id });
     return result.deletedCount > 0;
   }
 }

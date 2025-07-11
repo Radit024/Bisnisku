@@ -3,10 +3,10 @@ import type { Config } from 'tailwindcss'
 const config: Config = {
   darkMode: ["class"],
   content: [
-    './pages/**/*.{ts,tsx}',
-    './components/**/*.{ts,tsx}',
-    './app/**/*.{ts,tsx}',
-    './src/**/*.{ts,tsx}',
+    // index.html agar kelas di template juga terbaca
+    './index.html',
+    // seluruh kode React ada di src
+    './src/**/*.{ts,tsx,js,jsx}',
   ],
   prefix: "",
   theme: {

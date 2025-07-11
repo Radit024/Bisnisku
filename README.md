@@ -1,4 +1,4 @@
-# BisnisMu - Business Management Application
+# BisnisKu - Business Management Application
 
 A comprehensive business management application for Indonesian MSME owners, featuring transaction tracking, customer management, financial reporting, and HPP calculations.
 

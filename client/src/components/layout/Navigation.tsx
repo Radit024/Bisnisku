@@ -3,7 +3,7 @@ import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { ChartLine, Bell, Menu, ChevronDown, LogOut, User, Settings } from "lucide-react";
+import { TrendingUp, Bell, Menu, ChevronDown, LogOut, User, Settings } from "lucide-react";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { signOutUser } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
@@ -30,7 +30,7 @@ export function Navigation() {
       });
     } catch (error) {
       toast({
-        title: "Terjadi kesalahan",
+        title: "Error",
         description: "Gagal keluar dari akun",
         variant: "destructive",
       });
@@ -43,8 +43,8 @@ export function Navigation() {
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
             <div className="flex-shrink-0 flex items-center">
-              <ChartLine className="text-primary text-2xl mr-3" />
-              <h1 className="text-xl font-bold text-primary">BisnisMu</h1>
+              <TrendingUp className="text-primary text-2xl mr-3" />
+              <h1 className="text-xl font-bold text-primary">BisnisKu</h1>
             </div>
 
             {/* Desktop Navigation */}
@@ -72,9 +72,7 @@ export function Navigation() {
             {/* Notifications */}
             <Button variant="ghost" size="icon" className="relative">
               <Bell className="h-5 w-5" />
-              <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground rounded-full text-xs w-5 h-5 flex items-center justify-center">
-                3
-              </span>
+              <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full"></span>
             </Button>
 
             {/* Profile Dropdown */}

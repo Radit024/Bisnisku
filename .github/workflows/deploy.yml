@@ -1,4 +1,4 @@
-name: Deploy BisnisMu
+name: Deploy BisnisKu
 
 on:
   push:
